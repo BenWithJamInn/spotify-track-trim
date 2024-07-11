@@ -1,5 +1,5 @@
 import React from 'react';
-import {TbChevronLeftPipe, TbChevronRightPipe} from "react-icons/tb";
+import {TbChevronLeftPipe, TbChevronRightPipe, TbTrash} from "react-icons/tb";
 import {SpotifyTrim} from "../app";
 
 const getCurrentSongID = () => {
@@ -15,6 +15,20 @@ const Menu = () => {
     <Spicetify.ReactComponent.Menu>
       <Spicetify.ReactComponent.MenuItem
         onClick={() => {
+          SpotifyTrim.removeAllTrims(getCurrentSongID())
+        }}
+        leadingIcon={<TbTrash size={22} />}
+      >
+        <Spicetify.ReactComponent.TextComponent
+          semanticColor="textBase"
+          variant="viola"
+          weight="book"
+        >
+          Remove All Trims
+        </Spicetify.ReactComponent.TextComponent>
+      </Spicetify.ReactComponent.MenuItem>
+      <Spicetify.ReactComponent.MenuItem
+        onClick={() => {
           const clickTimestamp = getSongDuration() * SpotifyTrim.getProgressFromX(SpotifyTrim.lastX)
           for (let trim of SpotifyTrim.getTrims(getCurrentSongID())) {
             if (trim.isTimestampWithinTrim(clickTimestamp)) {
@@ -26,7 +40,7 @@ const Menu = () => {
           SpotifyTrim.newTrim(getCurrentSongID(), leftTimestamp, clickTimestamp)
           SpotifyTrim.renderTrims(getCurrentSongID())
         }}
-        leadingIcon={<TbChevronLeftPipe/>}
+        leadingIcon={<TbChevronLeftPipe size={20} />}
       >
         <Spicetify.ReactComponent.TextComponent
           semanticColor="textBase"
@@ -49,7 +63,7 @@ const Menu = () => {
           SpotifyTrim.newTrim(getCurrentSongID(), clickTimestamp, rightTimestamp)
           SpotifyTrim.renderTrims(getCurrentSongID())
         }}
-        leadingIcon={<TbChevronRightPipe/>}
+        leadingIcon={<TbChevronRightPipe size={20} />}
       >
         <Spicetify.ReactComponent.TextComponent
           semanticColor="textBase"

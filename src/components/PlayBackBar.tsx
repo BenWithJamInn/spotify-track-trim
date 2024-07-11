@@ -1,7 +1,7 @@
 import ReactType, {useEffect, useState} from "react";
 import PlayBackBarContextMenu from "./PlayBackBarContextMenu";
 import {SpotifyTrim, Trim} from "../app";
-import {TbChevronLeftPipe, TbChevronRightPipe} from "react-icons/tb";
+import {TbChevronLeftPipe, TbChevronRightPipe, TbTrash} from "react-icons/tb";
 
 const React = Spicetify.React as typeof ReactType;
 
@@ -30,13 +30,19 @@ const ChevronBar = () => {
     }
   }, [])
   return (
-    <div style={{width: "100%", height: "100%", position: "absolute", display: "flex", alignItems: "center"}}>
-      {songTrims.trims.map((trim, index) => <>
-          <PlayBackBarChevron direction={"left"} timestamp={trim.trimRight} trim={trim} updateTimestamp={num => trim.trimRight = num}/>
-          <PlayBackBarChevron direction={"right"} timestamp={trim.trimLeft} trim={trim} updateTimestamp={num => trim.trimLeft = num}/>
-        </>
-      )}
-    </div>
+    <Spicetify.ReactComponent.RemoteConfigProvider
+      configuration={Spicetify.Platform.RemoteConfiguration}
+    >
+      <div style={{width: "100%", height: "100%", position: "absolute", display: "flex", alignItems: "center"}}>
+        {songTrims.trims.map((trim, index) => <>
+            <PlayBackBarChevron direction={"left"} timestamp={trim.trimRight} trim={trim}
+                                updateTimestamp={num => trim.trimRight = num}/>
+            <PlayBackBarChevron direction={"right"} timestamp={trim.trimLeft} trim={trim}
+                                updateTimestamp={num => trim.trimLeft = num}/>
+          </>
+        )}
+      </div>
+    </Spicetify.ReactComponent.RemoteConfigProvider>
   )
 }
 
@@ -117,8 +123,37 @@ const PlayBackBarChevron = (props: PlayBackBarChevronProps) => {
         setMouseDown(true)
       }}
     >
-      {icon}
+      <Spicetify.ReactComponent.RightClickMenu
+        menu={<ChevronMenu trimID={props.trim.trimID}/>}
+      >
+        {icon}
+      </Spicetify.ReactComponent.RightClickMenu>
     </div>
+  )
+}
+
+interface ChevronMenuProps {
+  trimID: string
+}
+
+const ChevronMenu = (props: ChevronMenuProps) => {
+  return (
+    <Spicetify.ReactComponent.Menu>
+      <Spicetify.ReactComponent.MenuItem
+        onClick={() => {
+          SpotifyTrim.removeTrim(getCurrentSongID(), props.trimID)
+        }}
+        leadingIcon={<TbTrash size={22} />}
+      >
+        <Spicetify.ReactComponent.TextComponent
+          semanticColor="textBase"
+          variant="viola"
+          weight="book"
+        >
+          Remove Trim
+        </Spicetify.ReactComponent.TextComponent>
+      </Spicetify.ReactComponent.MenuItem>
+    </Spicetify.ReactComponent.Menu>
   )
 }
 

@@ -84,6 +84,19 @@ class SpotifyTrim {
     if (this.trims[songID]) {
       this.trims[songID] = this.trims[songID].filter(trim => trim.trimID !== trimID)
     }
+    this.renderTrims(songID)
+  }
+
+  /**
+   * Removes all trims from a song
+   *
+   * @param songID
+   */
+  public static removeAllTrims(songID: string) {
+    if (this.trims[songID]) {
+      this.trims[songID] = []
+    }
+    this.renderTrims(songID)
   }
 
   /**
