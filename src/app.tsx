@@ -87,6 +87,15 @@ class SpotifyTrim {
   }
 
   /**
+   * Get the trims for a song
+   *
+    * @param songID The song ID to get the trims for
+   */
+  public static getTrims(songID: string): Trim[] {
+    return this.trims[songID] || []
+  }
+
+  /**
    * Re-renders the chevrons on the playback bar
    *
    * @param songID The song ID to render the trims for
@@ -162,11 +171,12 @@ class SpotifyTrim {
         }
       }
     }
+    const reduction = Math.min(20000, Math.abs(result - timestamp))
     if (result != 0 && result != maxTimestamp) {
       if (left) {
-        result += 20000
+        result += reduction
       } else {
-        result -= 20000
+        result -= reduction
       }
     }
     return result
@@ -207,10 +217,10 @@ class Trim {
   /**
    * Returns true if the progress is within the trim
    *
-   * @param progress The progress to check
+   * @param timestamp The timestamp to check
    */
-  public isProgressWithinTrim(progress: number) {
-    return progress >= this.trimLeft && progress <= this.trimRight;
+  public isTimestampWithinTrim(timestamp: number) {
+    return timestamp >= this.trimLeft && timestamp <= this.trimRight;
   }
 
   get trimID(): string {

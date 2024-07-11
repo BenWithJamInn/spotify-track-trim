@@ -16,6 +16,12 @@ const Menu = () => {
       <Spicetify.ReactComponent.MenuItem
         onClick={() => {
           const clickTimestamp = getSongDuration() * SpotifyTrim.getProgressFromX(SpotifyTrim.lastX)
+          for (let trim of SpotifyTrim.getTrims(getCurrentSongID())) {
+            if (trim.isTimestampWithinTrim(clickTimestamp)) {
+              Spicetify.showNotification("Cannot add a new trim within an existing trim!", true)
+              return
+            }
+          }
           const leftTimestamp = SpotifyTrim.getNextTimestampJump(getCurrentSongID(), clickTimestamp, getSongDuration(), "left")
           SpotifyTrim.newTrim(getCurrentSongID(), leftTimestamp, clickTimestamp)
           SpotifyTrim.renderTrims(getCurrentSongID())
@@ -33,6 +39,12 @@ const Menu = () => {
       <Spicetify.ReactComponent.MenuItem
         onClick={() => {
           const clickTimestamp = getSongDuration() * SpotifyTrim.getProgressFromX(SpotifyTrim.lastX)
+          for (let trim of SpotifyTrim.getTrims(getCurrentSongID())) {
+            if (trim.isTimestampWithinTrim(clickTimestamp)) {
+              Spicetify.showNotification("Cannot add a new trim within an existing trim!", true)
+              return
+            }
+          }
           const rightTimestamp = SpotifyTrim.getNextTimestampJump(getCurrentSongID(), clickTimestamp, getSongDuration(), "right")
           SpotifyTrim.newTrim(getCurrentSongID(), clickTimestamp, rightTimestamp)
           SpotifyTrim.renderTrims(getCurrentSongID())
