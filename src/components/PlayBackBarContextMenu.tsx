@@ -6,10 +6,6 @@ const getCurrentSongID = () => {
   return Spicetify.Player.data.item.uid
 }
 
-const getSongProgress = () => {
-  return Spicetify.Player.getProgress()
-}
-
 const getSongDuration = () => {
   return Spicetify.Player.data.item.duration.milliseconds
 }
@@ -64,7 +60,7 @@ const PlayBackBarContextMenu = () => {
       <Spicetify.ReactComponent.RightClickMenu
         menu={<Menu/>}
       >
-        <div style={{width: "100%", height: "100%", position: "absolute", zIndex: "999"}} id={"test22"}></div>
+        <div style={{width: "100%", height: "100%", position: "absolute", zIndex: "101"}}></div>
       </Spicetify.ReactComponent.RightClickMenu>
     </Spicetify.ReactComponent.RemoteConfigProvider>
   );

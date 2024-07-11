@@ -1,7 +1,6 @@
 import ReactDOMType from "react-dom";
 import ReactType from "react";
-import {PlayBackBar} from "./components/PlayBackBar";
-import {Simulate} from "react-dom/test-utils";
+import {ChevronBar, PlayBackBar} from "./components/PlayBackBar";
 
 const ReactDOM = Spicetify.ReactDOM as typeof ReactDOMType;
 const React = Spicetify.React as typeof ReactType
@@ -11,21 +10,30 @@ async function App() {
 		setTimeout(App, 10);
 		return;
 	}
-  const bar = document.querySelector(".progress-bar") as HTMLElement
-  if (!(bar)) {
+  const barLower = document.querySelector(".progress-bar") as HTMLElement
+  const barUpper = document.querySelector(".playback-progressbar-container") as HTMLElement
+  if (!(barLower && barUpper)) {
     Spicetify.showNotification("Failed to load spotify trim: Playback bar not found!")
 		return;
 	}
-
 
   SpotifyTrim.barOverlay.id = "playback-bar-overlap"
   SpotifyTrim.barOverlay.style.position = "absolute"
   SpotifyTrim.barOverlay.style.width = "100%"
   SpotifyTrim.barOverlay.style.height = "100%"
-  bar.style.position = "relative"
-  bar.append(SpotifyTrim.barOverlay);
+  barLower.style.position = "relative"
+  barLower.append(SpotifyTrim.barOverlay);
+  SpotifyTrim.internalProgressBar = barLower
 
-  const _ = (async () => ReactDOM.render(<PlayBackBar />, SpotifyTrim.barOverlay))()
+  SpotifyTrim.dragBlock.id = "playback-bar-drag-block"
+  SpotifyTrim.dragBlock.style.position = "absolute"
+  SpotifyTrim.dragBlock.style.width = "100%"
+  SpotifyTrim.dragBlock.style.height = "100%"
+  barUpper.style.position = "relative"
+  barUpper.append(SpotifyTrim.dragBlock)
+
+  const ignored1 = (async () => ReactDOM.render(<PlayBackBar />, SpotifyTrim.barOverlay))()
+  const ignored2 = (async () => ReactDOM.render(<ChevronBar />, SpotifyTrim.dragBlock))()
 
   // initalise spotify trim
   SpotifyTrim.init()
@@ -35,6 +43,8 @@ class SpotifyTrim {
   private static trims: { [key: string]: Trim[]} = {}
   private static _updateActiveTrims: ((trims: Trim[]) => void) | null = null;
   private static _barOverlay: HTMLDivElement = document.createElement("div");
+  private static _internalProgressBar: HTMLElement
+  public static dragBlock: HTMLDivElement = document.createElement("div");
   private static _lastX: number = 0;
 
   public static init() {
@@ -125,43 +135,41 @@ class SpotifyTrim {
    * @param timestamp
    * @param maxTimestamp
    * @param direction
+   * @param ignoredID
    */
-  public static getNextTimestampJump(songID: string, timestamp: number, maxTimestamp: number, direction: "left" | "right"): number {
+  public static getNextTimestampJump(songID: string, timestamp: number, maxTimestamp: number, direction: "left" | "right", ignoredID: string | null = null): number {
     const trims = this.trims[songID] || []
-    const left = direction === "left"
+    const left = direction === "left" // lowest?
     if (trims.length == 0) {
-      if (direction === "left") {
+      if (left) {
         return 0
       } else {
-        return maxTimestamp
+        maxTimestamp
       }
     }
-    let minTimestamp = left ? 0 : maxTimestamp
-    let currentMinDelta = maxTimestamp
-    for (let trim of trims) {
+    let result = left ? 0 : maxTimestamp
+    for (let i = trims.length - 1; i >= 0; i--) {
+      if (trims[i].trimID === ignoredID) {
+        continue
+      }
       if (left) {
-        let delta = timestamp - trim.trimRight;
-        if (trim.trimRight < timestamp && delta < currentMinDelta) {
-          minTimestamp = trim.trimRight
-          currentMinDelta = delta
+        if (trims[i].trimRight < timestamp) {
+          result = Math.max(result, trims[i].trimRight)
         }
       } else {
-        let delta = trim.trimLeft - timestamp;
-        if (trim.trimLeft > timestamp && delta < currentMinDelta) {
-          minTimestamp = trim.trimLeft
-          currentMinDelta = delta
+        if (trims[i].trimLeft > timestamp) {
+          result = Math.min(result, trims[i].trimLeft)
         }
       }
     }
-    console.log("max", maxTimestamp, "min", minTimestamp)
-    if (minTimestamp != 0 && minTimestamp != maxTimestamp) {
+    if (result != 0 && result != maxTimestamp) {
       if (left) {
-        minTimestamp += 20000
+        result += 20000
       } else {
-        minTimestamp -= 20000
+        result -= 20000
       }
     }
-    return minTimestamp
+    return result
   }
 
   static get barOverlay(): HTMLDivElement {
@@ -172,6 +180,14 @@ class SpotifyTrim {
     return this._lastX;
   }
 
+  static get internalProgressBar(): HTMLElement {
+    return this._internalProgressBar;
+  }
+
+  static set internalProgressBar(value: HTMLElement) {
+    this._internalProgressBar = value;
+  }
+
   static set updateActiveTrims(value: ((trims: Trim[]) => void) | null) {
     this._updateActiveTrims = value;
   }
@@ -179,8 +195,8 @@ class SpotifyTrim {
 
 class Trim {
   private readonly _trimID: string;
-  private readonly _trimLeft: number;
-  private readonly _trimRight: number;
+  private _trimLeft: number;
+  private _trimRight: number;
 
   constructor(trimLeft: number, trimRight: number) {
     this._trimID = Math.random().toString(36).substring(7);
@@ -207,6 +223,14 @@ class Trim {
 
   get trimRight(): number {
     return this._trimRight;
+  }
+
+  set trimLeft(value: number) {
+    this._trimLeft = value;
+  }
+
+  set trimRight(value: number) {
+    this._trimRight = value;
   }
 }
 
