@@ -12,5 +12,8 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "spicetify-creator": "^1.0.17"
+  },
+  "dependencies": {
+    "react-icons": "^5.2.1"
   }
 }

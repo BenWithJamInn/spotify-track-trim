@@ -1806,6 +1806,7 @@ declare namespace Spicetify {
 		 * @see Spicetify.ReactComponent.ButtonProps
 		 */
 		const ButtonTertiary: any;
+		const RemoteConfigProvider: any;
 	}
 
 	/**
