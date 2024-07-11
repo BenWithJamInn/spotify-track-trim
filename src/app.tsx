@@ -148,7 +148,7 @@ class SpotifyTrim {
       } else {
         let delta = trim.trimLeft - timestamp;
         if (trim.trimLeft > timestamp && delta < currentMinDelta) {
-          minTimestamp = trim.trimRight
+          minTimestamp = trim.trimLeft
           currentMinDelta = delta
         }
       }

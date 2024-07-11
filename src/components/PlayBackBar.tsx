@@ -38,7 +38,7 @@ interface PlayBackBarChevronProps {
 const PlayBackBarChevron = (props: PlayBackBarChevronProps) => {
   const icon = props.direction === "left" ? <TbChevronLeftPipe size={20} /> : <TbChevronRightPipe size={20}  />;
   let offset = SpotifyTrim.getRelativeXFromProgress(props.timestamp / getSongDuration()) - (props.direction === "left" ? 7 : 13);
-  console.log(props.timestamp, getSongDuration(), offset)
+
   return (
     <div style={{position: "absolute", left: offset, display: "flex", alignItems: "center"}}>
       {icon}
