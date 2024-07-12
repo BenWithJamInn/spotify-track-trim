@@ -17,29 +17,29 @@ async function App() {
 		return;
 	}
 
-  SpotifyTrim.barOverlay.id = "playback-bar-overlap"
-  SpotifyTrim.barOverlay.style.position = "absolute"
-  SpotifyTrim.barOverlay.style.width = "100%"
-  SpotifyTrim.barOverlay.style.height = "100%"
+  TrackTrim.barOverlay.id = "playback-bar-overlap"
+  TrackTrim.barOverlay.style.position = "absolute"
+  TrackTrim.barOverlay.style.width = "100%"
+  TrackTrim.barOverlay.style.height = "100%"
   barLower.style.position = "relative"
-  barLower.append(SpotifyTrim.barOverlay);
-  SpotifyTrim.internalProgressBar = barLower
+  barLower.append(TrackTrim.barOverlay);
+  TrackTrim.internalProgressBar = barLower
 
-  SpotifyTrim.dragBlock.id = "playback-bar-drag-block"
-  SpotifyTrim.dragBlock.style.position = "absolute"
-  SpotifyTrim.dragBlock.style.width = "100%"
-  SpotifyTrim.dragBlock.style.height = "100%"
+  TrackTrim.dragBlock.id = "playback-bar-drag-block"
+  TrackTrim.dragBlock.style.position = "absolute"
+  TrackTrim.dragBlock.style.width = "100%"
+  TrackTrim.dragBlock.style.height = "100%"
   barUpper.style.position = "relative"
-  barUpper.append(SpotifyTrim.dragBlock)
+  barUpper.append(TrackTrim.dragBlock)
 
-  const ignored1 = (async () => ReactDOM.render(<PlayBackBar />, SpotifyTrim.barOverlay))()
-  const ignored2 = (async () => ReactDOM.render(<ChevronBar />, SpotifyTrim.dragBlock))()
+  const ignored1 = (async () => ReactDOM.render(<PlayBackBar />, TrackTrim.barOverlay))()
+  const ignored2 = (async () => ReactDOM.render(<ChevronBar />, TrackTrim.dragBlock))()
 
   // initalise spotify trim
-  SpotifyTrim.init()
+  TrackTrim.init()
 }
 
-class SpotifyTrim {
+class TrackTrim {
   private static trims: { [key: string]: Trim[]} = {}
   private static _updateActiveTrims: ((trims: Trim[]) => void) | null = null;
   private static _barOverlay: HTMLDivElement = document.createElement("div");
@@ -58,7 +58,7 @@ class SpotifyTrim {
     })
 
     Spicetify.Player.addEventListener("songchange", () => {
-      SpotifyTrim.renderTrims(Spicetify.Player.data.item.uid)
+      TrackTrim.renderTrims(Spicetify.Player.data.item.uid)
     })
 
     Spicetify.Player.addEventListener("onprogress", (event) => {
@@ -325,4 +325,4 @@ class Trim {
 }
 
 export default App;
-export { SpotifyTrim, Trim }
+export { TrackTrim, Trim }

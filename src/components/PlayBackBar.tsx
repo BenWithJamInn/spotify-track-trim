@@ -1,6 +1,6 @@
 import ReactType, {useEffect, useState} from "react";
 import PlayBackBarContextMenu from "./PlayBackBarContextMenu";
-import {SpotifyTrim, Trim} from "../app";
+import {TrackTrim, Trim} from "../app";
 import {TbChevronLeftPipe, TbChevronRightPipe, TbTrash} from "react-icons/tb";
 
 const React = Spicetify.React as typeof ReactType;
@@ -25,7 +25,7 @@ const ChevronBar = () => {
   const [songTrims, setSongTrims] = React.useState<{ trims: Trim[], reID: number }>({trims: [], reID: 0});
 
   useEffect(() => {
-    SpotifyTrim.updateActiveTrims = (newTrims) => {
+    TrackTrim.updateActiveTrims = (newTrims) => {
       setSongTrims({trims: newTrims, reID: songTrims.reID + 1});
     }
   }, [])
@@ -84,7 +84,7 @@ const PlayBackBarChevron = (props: PlayBackBarChevronProps) => {
   const icon = props.direction === "left" ?
     <TbChevronLeftPipe size={visualHover ? 22 : 20} color={visualHover ? "white" : ""}/> :
     <TbChevronRightPipe size={visualHover ? 22 : 20} color={visualHover ? "white" : ""}/>;
-  let offset = SpotifyTrim.getRelativeXFromProgress(props.timestamp / getSongDuration()) - (props.direction === "left" ? 7 : 15);
+  let offset = TrackTrim.getRelativeXFromProgress(props.timestamp / getSongDuration()) - (props.direction === "left" ? 7 : 15);
 
   useEffect(() => {
     const pairedTimestamp = props.direction === "left" ? props.trim.trimLeft : props.trim.trimRight
@@ -92,9 +92,9 @@ const PlayBackBarChevron = (props: PlayBackBarChevronProps) => {
     const handleMouseMove = (event: MouseEvent) => {
       if (mouseDown) {
         const x = event.clientX
-        const progress = Math.min(getSongDuration(), Math.max(0, SpotifyTrim.getProgressFromX(x)))
+        const progress = Math.min(getSongDuration(), Math.max(0, TrackTrim.getProgressFromX(x)))
         let newTimestamp = getSongDuration() * progress
-        const maxMinTimeStamp = SpotifyTrim.getNextTimestampJump(
+        const maxMinTimeStamp = TrackTrim.getNextTimestampJump(
           getCurrentSongID(),
           pairedTimestamp,
           getSongDuration(),
@@ -162,7 +162,7 @@ const ChevronMenu = (props: ChevronMenuProps) => {
     <Spicetify.ReactComponent.Menu>
       <Spicetify.ReactComponent.MenuItem
         onClick={() => {
-          SpotifyTrim.removeTrim(getCurrentSongID(), props.trimID)
+          TrackTrim.removeTrim(getCurrentSongID(), props.trimID)
         }}
         leadingIcon={<TbTrash size={22} />}
       >
@@ -184,8 +184,8 @@ interface PlayBackBarTrimIndicatorProps {
 }
 
 const PlayBackBarTrimIndicator = (props: PlayBackBarTrimIndicatorProps) => {
-  const startX = SpotifyTrim.getRelativeXFromProgress(props.start / getSongDuration())
-  const endX = SpotifyTrim.getRelativeXFromProgress(props.end / getSongDuration())
+  const startX = TrackTrim.getRelativeXFromProgress(props.start / getSongDuration())
+  const endX = TrackTrim.getRelativeXFromProgress(props.end / getSongDuration())
   const width = endX - startX
 
   const playBackBarThin = document.querySelector(".x-progressBar-progressBarBg") as HTMLElement

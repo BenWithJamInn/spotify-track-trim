@@ -1,6 +1,6 @@
 import React from 'react';
 import {TbChevronLeftPipe, TbChevronRightPipe, TbTrash} from "react-icons/tb";
-import {SpotifyTrim} from "../app";
+import {TrackTrim} from "../app";
 
 const getCurrentSongID = () => {
   return Spicetify.Player.data.item.uid
@@ -15,7 +15,7 @@ const Menu = () => {
     <Spicetify.ReactComponent.Menu>
       <Spicetify.ReactComponent.MenuItem
         onClick={() => {
-          SpotifyTrim.removeAllTrims(getCurrentSongID())
+          TrackTrim.removeAllTrims(getCurrentSongID())
         }}
         leadingIcon={<TbTrash size={22} />}
       >
@@ -29,16 +29,16 @@ const Menu = () => {
       </Spicetify.ReactComponent.MenuItem>
       <Spicetify.ReactComponent.MenuItem
         onClick={() => {
-          const clickTimestamp = getSongDuration() * SpotifyTrim.getProgressFromX(SpotifyTrim.lastX)
-          for (let trim of SpotifyTrim.getTrims(getCurrentSongID())) {
+          const clickTimestamp = getSongDuration() * TrackTrim.getProgressFromX(TrackTrim.lastX)
+          for (let trim of TrackTrim.getTrims(getCurrentSongID())) {
             if (trim.isTimestampWithinTrim(clickTimestamp)) {
               Spicetify.showNotification("Cannot add a new trim within an existing trim!", true)
               return
             }
           }
-          const leftTimestamp = SpotifyTrim.getNextTimestampJump(getCurrentSongID(), clickTimestamp, getSongDuration(), "left")
-          SpotifyTrim.newTrim(getCurrentSongID(), leftTimestamp, clickTimestamp)
-          SpotifyTrim.renderTrims(getCurrentSongID())
+          const leftTimestamp = TrackTrim.getNextTimestampJump(getCurrentSongID(), clickTimestamp, getSongDuration(), "left")
+          TrackTrim.newTrim(getCurrentSongID(), leftTimestamp, clickTimestamp)
+          TrackTrim.renderTrims(getCurrentSongID())
         }}
         leadingIcon={<TbChevronLeftPipe size={20} />}
       >
@@ -52,16 +52,16 @@ const Menu = () => {
       </Spicetify.ReactComponent.MenuItem>
       <Spicetify.ReactComponent.MenuItem
         onClick={() => {
-          const clickTimestamp = getSongDuration() * SpotifyTrim.getProgressFromX(SpotifyTrim.lastX)
-          for (let trim of SpotifyTrim.getTrims(getCurrentSongID())) {
+          const clickTimestamp = getSongDuration() * TrackTrim.getProgressFromX(TrackTrim.lastX)
+          for (let trim of TrackTrim.getTrims(getCurrentSongID())) {
             if (trim.isTimestampWithinTrim(clickTimestamp)) {
               Spicetify.showNotification("Cannot add a new trim within an existing trim!", true)
               return
             }
           }
-          const rightTimestamp = SpotifyTrim.getNextTimestampJump(getCurrentSongID(), clickTimestamp, getSongDuration(), "right")
-          SpotifyTrim.newTrim(getCurrentSongID(), clickTimestamp, rightTimestamp)
-          SpotifyTrim.renderTrims(getCurrentSongID())
+          const rightTimestamp = TrackTrim.getNextTimestampJump(getCurrentSongID(), clickTimestamp, getSongDuration(), "right")
+          TrackTrim.newTrim(getCurrentSongID(), clickTimestamp, rightTimestamp)
+          TrackTrim.renderTrims(getCurrentSongID())
         }}
         leadingIcon={<TbChevronRightPipe size={20} />}
       >
