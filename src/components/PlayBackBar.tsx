@@ -189,7 +189,7 @@ const PlayBackBarTrimIndicator = (props: PlayBackBarTrimIndicatorProps) => {
   const width = endX - startX
 
   const playBackBarThin = document.querySelector(".x-progressBar-progressBarBg") as HTMLElement
-  const height = playBackBarThin.clientHeight
+  const height = playBackBarThin.clientHeight + 1
 
   return (
     <div
@@ -198,8 +198,9 @@ const PlayBackBarTrimIndicator = (props: PlayBackBarTrimIndicatorProps) => {
         backgroundColor: "rgb(160,0,0)",
         margin: "auto",
         height: `${height}px`,
-        width: `${width}px`,
-        left: `${startX}px`
+        width: `${width}px `,
+        left: `${startX}px`,
+        // transform: "translateY(-1px)",
       }}
     ></div>
   )
