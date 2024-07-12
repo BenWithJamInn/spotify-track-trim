@@ -57,6 +57,10 @@ class SpotifyTrim {
       this.renderTrims(Spicetify.Player.data.item.uid)
     })
 
+    Spicetify.Player.addEventListener("songchange", () => {
+      SpotifyTrim.renderTrims(Spicetify.Player.data.item.uid)
+    })
+
     Spicetify.Player.addEventListener("onprogress", (event) => {
       // cooldown of 15 events after seeking/skipping as events are sent too fast and can cause seeks to fire twice
       if (this.handlingCooldown > 0) {
@@ -206,7 +210,7 @@ class SpotifyTrim {
         }
       }
     }
-    const reduction = Math.min(maxTimestamp * 0.1, Math.abs(result - timestamp))
+    const reduction = Math.min(maxTimestamp * 0.05, Math.abs(result - timestamp))
     if (result != 0 && result != maxTimestamp) {
       if (left) {
         result += reduction

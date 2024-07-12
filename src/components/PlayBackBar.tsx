@@ -34,15 +34,38 @@ const ChevronBar = () => {
       configuration={Spicetify.Platform.RemoteConfiguration}
     >
       <div style={{width: "100%", height: "100%", position: "absolute", display: "flex", alignItems: "center"}}>
-        {songTrims.trims.map((trim, index) => <>
-            <PlayBackBarChevron direction={"left"} timestamp={trim.trimRight} trim={trim}
-                                updateTimestamp={num => trim.trimRight = num}/>
-            <PlayBackBarChevron direction={"right"} timestamp={trim.trimLeft} trim={trim}
-                                updateTimestamp={num => trim.trimLeft = num}/>
-          </>
-        )}
+        {songTrims.trims.map((trim, index) => <PlayBackIndicatorGroup trim={trim} />)}
       </div>
     </Spicetify.ReactComponent.RemoteConfigProvider>
+  )
+}
+
+interface PlayBackIndicatorGroupProps {
+  trim: Trim
+}
+
+const PlayBackIndicatorGroup = (props: PlayBackIndicatorGroupProps) => {
+  const [trimData, setTrimData] = useState({trim: props.trim, reID: 0})
+
+  function updateTrimData(direction: "left" | "right", timestamp: number) {
+    setTrimData(data => {
+      if (direction === "left") {
+        data.trim.trimLeft = timestamp
+      } else {
+        data.trim.trimRight = timestamp
+      }
+      return {trim: data.trim, reID: data.reID + 1}
+    })
+  }
+
+  return (
+    <>
+      <PlayBackBarChevron direction={"left"} timestamp={trimData.trim.trimRight} trim={trimData.trim}
+                          updateTimestamp={num => updateTrimData("right", num)}/>
+      <PlayBackBarChevron direction={"right"} timestamp={trimData.trim.trimLeft} trim={trimData.trim}
+                          updateTimestamp={num => updateTrimData("left", num)}/>
+      <PlayBackBarTrimIndicator start={trimData.trim.trimLeft} end={trimData.trim.trimRight}/>
+    </>
   )
 }
 
@@ -56,13 +79,12 @@ interface PlayBackBarChevronProps {
 const PlayBackBarChevron = (props: PlayBackBarChevronProps) => {
   const [hovered, setHovered] = useState(false)
   const [mouseDown, setMouseDown] = useState(false)
-  const [timeStamp, setTimeStamp] = useState(props.timestamp)
   const visualHover = hovered || mouseDown
 
   const icon = props.direction === "left" ?
     <TbChevronLeftPipe size={visualHover ? 22 : 20} color={visualHover ? "white" : ""}/> :
     <TbChevronRightPipe size={visualHover ? 22 : 20} color={visualHover ? "white" : ""}/>;
-  let offset = SpotifyTrim.getRelativeXFromProgress(timeStamp / getSongDuration()) - (props.direction === "left" ? 7 : 15);
+  let offset = SpotifyTrim.getRelativeXFromProgress(props.timestamp / getSongDuration()) - (props.direction === "left" ? 7 : 15);
 
   useEffect(() => {
     const pairedTimestamp = props.direction === "left" ? props.trim.trimLeft : props.trim.trimRight
@@ -85,7 +107,6 @@ const PlayBackBarChevron = (props: PlayBackBarChevronProps) => {
           newTimestamp = Math.min(Math.max(maxMinTimeStamp, newTimestamp), pairedTimestamp - 2000)
         }
         props.updateTimestamp(newTimestamp)
-        setTimeStamp(newTimestamp)
       }
     }
     const handleMouseUp = () => {
@@ -99,7 +120,7 @@ const PlayBackBarChevron = (props: PlayBackBarChevronProps) => {
       document.body.removeEventListener("mousemove", handleMouseMove)
       document.body.removeEventListener("mouseup", handleMouseUp)
     }
-  }, [mouseDown, timeStamp]);
+  }, [mouseDown]);
 
   return (
     <div
@@ -154,6 +175,33 @@ const ChevronMenu = (props: ChevronMenuProps) => {
         </Spicetify.ReactComponent.TextComponent>
       </Spicetify.ReactComponent.MenuItem>
     </Spicetify.ReactComponent.Menu>
+  )
+}
+
+interface PlayBackBarTrimIndicatorProps {
+  start: number,
+  end: number
+}
+
+const PlayBackBarTrimIndicator = (props: PlayBackBarTrimIndicatorProps) => {
+  const startX = SpotifyTrim.getRelativeXFromProgress(props.start / getSongDuration())
+  const endX = SpotifyTrim.getRelativeXFromProgress(props.end / getSongDuration())
+  const width = endX - startX
+
+  const playBackBarThin = document.querySelector(".x-progressBar-progressBarBg") as HTMLElement
+  const height = playBackBarThin.clientHeight
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        backgroundColor: "rgb(160,0,0)",
+        margin: "auto",
+        height: `${height}px`,
+        width: `${width}px`,
+        left: `${startX}px`
+      }}
+    ></div>
   )
 }
 
