@@ -46,6 +46,7 @@ class SpotifyTrim {
   private static _internalProgressBar: HTMLElement
   public static dragBlock: HTMLDivElement = document.createElement("div");
   private static _lastX: number = 0;
+  private static handlingCooldown: number = 0;
 
   public static init() {
     this._barOverlay.addEventListener("contextmenu", (event) => {
@@ -54,6 +55,27 @@ class SpotifyTrim {
 
     visualViewport!.addEventListener("resize", () => {
       this.renderTrims(Spicetify.Player.data.item.uid)
+    })
+
+    Spicetify.Player.addEventListener("onprogress", (event) => {
+      // cooldown of 15 events after seeking/skipping as events are sent too fast and can cause seeks to fire twice
+      if (this.handlingCooldown > 0) {
+        this.handlingCooldown--
+        return;
+      }
+      const timestamp = Spicetify.Player.getProgress();
+      const duration = Spicetify.Player.data.item.duration.milliseconds
+      const uid = Spicetify.Player.data.item.uid
+      if (this.getIntersectingTrim(uid, timestamp) == null) {
+        return
+      }
+      this.handlingCooldown = 15;
+      const seekTimesteamp = this.resolveSongSeek(uid, timestamp, duration, Spicetify.Player.getRepeat() != 2)
+      if (seekTimesteamp == duration) {
+        Spicetify.Player.next()
+      } else {
+        Spicetify.Player.seek(seekTimesteamp)
+      }
     })
   }
 
@@ -184,7 +206,7 @@ class SpotifyTrim {
         }
       }
     }
-    const reduction = Math.min(20000, Math.abs(result - timestamp))
+    const reduction = Math.min(maxTimestamp * 0.1, Math.abs(result - timestamp))
     if (result != 0 && result != maxTimestamp) {
       if (left) {
         result += reduction
@@ -193,6 +215,47 @@ class SpotifyTrim {
       }
     }
     return result
+  }
+
+  /**
+   * Returns any intersecting trim with the timestamp
+   *
+   * @param songID The song ID to check
+   * @param timestamp The timestamp to check
+   */
+  public static getIntersectingTrim(songID: string, timestamp: number): Trim | null {
+    const trims = this.trims[songID] || []
+    for (let trim of trims) {
+      if (trim.isTimestampWithinTrim(timestamp)) {
+        return trim
+      }
+    }
+    return null
+  }
+
+  /**
+   * Resolves the seek time for a song, this prevents from seeking into a trimmed section of the song
+   *
+   * @param songID The song ID
+   * @param timestamp The current time stamp
+   * @param duration The duration of the song, if the timestamp equals the duration then skip the song
+   * @param allowSkip If the song can be skipped, this will be false if the song is on repeat and a timestamp withing
+   * the track will be returned
+   */
+  public static resolveSongSeek(songID: string, timestamp: number, duration: number, allowSkip: boolean): number {
+    const trims = this.trims[songID] || []
+    for (let trim of trims) {
+      if (trim.isTimestampWithinTrim(timestamp)) {
+        if (duration - trim.trimRight <= 1000 && !allowSkip) {
+          return this.resolveSongSeek(songID, 0, duration, true) + 1000
+        } else if (trim.trimRight + 1000 >= duration) {
+          return duration
+        } else {
+          return trim.trimRight + 1000
+        }
+      }
+    }
+    return timestamp
   }
 
   static get barOverlay(): HTMLDivElement {
