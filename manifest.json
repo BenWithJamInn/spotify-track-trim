@@ -1,13 +1,15 @@
-{
-  "name": "Track Trim",
-  "description": "Trim your songs to automatically skip unwanted segments.",
-  "preview": "assets/track-trim-icon.gif",
-  "main": "release/track-trim.js",
-  "readme": "README.md",
-  "tags": [
-    "interface",
-    "utility",
-    "skip",
-    "timestamp"
-  ]
-}
+[
+  {
+    "name": "Track Trim",
+    "description": "Trim your songs to automatically skip unwanted segments.",
+    "preview": "assets/track-trim-icon.gif",
+    "main": "release/track-trim.js",
+    "readme": "README.md",
+    "tags": [
+      "interface",
+      "utility",
+      "skip",
+      "timestamp"
+    ]
+  }
+]
