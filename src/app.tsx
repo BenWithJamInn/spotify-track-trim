@@ -1,6 +1,7 @@
 import ReactDOMType from "react-dom";
 import ReactType from "react";
 import {ChevronBar, PlayBackBar} from "./components/PlayBackBar";
+import registerProfileMenu from "./components/ProfileMenu";
 
 const ReactDOM = Spicetify.ReactDOM as typeof ReactDOMType;
 const React = Spicetify.React as typeof ReactType
@@ -89,6 +90,8 @@ class TrackTrim {
         Spicetify.Player.seek(seekTimesteamp)
       }
     })
+
+    registerProfileMenu()
   }
 
   /**
@@ -307,6 +310,72 @@ class TrackTrim {
       }
     }
     return timestamp
+  }
+
+  /**
+   * Export all trims to a json file
+   */
+  public static exportTrims() {
+    const data = {
+      date: new Date().toISOString(),
+      songs: [] as SavedSong[]
+    }
+    for (let localStorageKey in localStorage) {
+      if (localStorageKey.startsWith("track-trim:trims:")) {
+        const song = localStorageKey.replace("track-trim:trims:", "")
+        const savedSong = this.getSavedSong(song)
+        data.songs.push(savedSong)
+      }
+    }
+    const jsonData = JSON.stringify(data)
+    const blob = new Blob([jsonData], {type: "application/json"})
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement("a")
+    anchor.href = url
+    anchor.download = "track-trim-export.json"
+    anchor.target = "_blank"
+    anchor.click()
+    Spicetify.showNotification("Trims exported to your downloads folder as track-trim-export.json!")
+  }
+
+  public static async importTrims() {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = ".json"
+    input.onchange = async () => {
+      if (!input.files || input.files.length == 0) {
+        return
+      }
+      const file = input.files[0]
+      const reader = new FileReader()
+      reader.onload = async () => {
+        const data = JSON.parse(reader.result as string)
+        const importedIDs = [] as string[]
+        for (let song of data.songs) {
+          importedIDs.push(song.id)
+          delete this.trims[song.id]
+          this.saveSong(song)
+          console.log("Imported song", song.id)
+        }
+        // remove all stored songs that are not in the imported data
+        const keys = [] as string[]
+        for (let localStorageKey in localStorage) {
+          if (localStorageKey.startsWith("track-trim:trims:")) {
+            const song = localStorageKey.replace("track-trim:trims:", "")
+            if (!importedIDs.includes(song)) {
+              keys.push(localStorageKey)
+            }
+          }
+        }
+        for (let key of keys) {
+          Spicetify.LocalStorage.remove(key)
+        }
+        Spicetify.showNotification("Trims imported!")
+        this.renderTrims(Spicetify.Player.data.item.uid)
+      }
+      reader.readAsText(file)
+    }
+    input.click()
   }
 
   static get barOverlay(): HTMLDivElement {
