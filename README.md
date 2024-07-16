@@ -8,7 +8,7 @@ Track trim is an extension that allows you to trim the unwanted sections of your
 
 ### Marketplace (easy):
 
-The easiest way to install this extension is through the marketplace. Simply search for "Track Trim" and click the install button.
+The easiest way to install this extension is through the marketplace. Simply search for "Track Trim" and click the install button. You may need to click the "Load more" button to find the extension.
 
 ### Manually:
 
